@@ -102,24 +102,7 @@ What these prove:
 - `build` — production bundle still compiles
 
 ## AI / operator handoff
-If an AI agent or a new maintainer lands in this repo, read in this order:
-1. `README.md`
-2. `PLAN.md`
-3. `src/config/site.ts`
-4. `src/config/brand.ts`
-5. `src/config/template.ts`
-6. `src/modules/checkout/checkout.server.ts`
-7. `src/modules/orders/orders.server.ts`
-8. `scripts/seed-dev.ts`
-9. `scripts/smoke-store.ts`
-10. `DESIGN.md` and `docs/stitch-prompts.md`
-
-High-value repo rules:
-- keep provider-specific data in `payment_attempts`, not `orders`
-- keep clone-specific values in `src/config/*`
-- keep reusable domain logic in `src/modules/*`
-- verify changes with the smoke script, not only browser clicks
-- do not assume payments are production-ready yet
+Read `AGENTS.md` after this README. It contains the minimal read order, setup path, verification commands, and repo hygiene rules for future humans or agents.
 
 ## Main commands
 ```bash
@@ -213,7 +196,7 @@ npx skills find <query>
 ```
 
 ## Related repo docs
-- `PLAN.md` — quick operator summary
+- `AGENTS.md` — minimal AI/operator handoff and repo hygiene rules
 - `DESIGN.md` — design system handoff for Stitch
 - `docs/stitch-prompts.md` — prompt set for auth/dashboard/orders/licenses/navbar generation
 
