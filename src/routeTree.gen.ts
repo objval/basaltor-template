@@ -8,59 +8,377 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root"
-import { Route as IndexRouteImport } from "./routes/index"
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as LicensesRouteImport } from './routes/licenses'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CartRouteImport } from './routes/cart'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProductsSlugRouteImport } from './routes/products/$slug'
+import { Route as OrdersPublicIdRouteImport } from './routes/orders/$publicId'
+import { Route as GuestOrdersPublicIdRouteImport } from './routes/guest/orders/$publicId'
+import { Route as CheckoutMockAttemptPublicIdRouteImport } from './routes/checkout/mock/$attemptPublicId'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersRoute = OrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LicensesRoute = LicensesRouteImport.update({
+  id: '/licenses',
+  path: '/licenses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsSlugRoute = ProductsSlugRouteImport.update({
+  id: '/products/$slug',
+  path: '/products/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersPublicIdRoute = OrdersPublicIdRouteImport.update({
+  id: '/$publicId',
+  path: '/$publicId',
+  getParentRoute: () => OrdersRoute,
+} as any)
+const GuestOrdersPublicIdRoute = GuestOrdersPublicIdRouteImport.update({
+  id: '/guest/orders/$publicId',
+  path: '/guest/orders/$publicId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutMockAttemptPublicIdRoute =
+  CheckoutMockAttemptPublicIdRouteImport.update({
+    id: '/mock/$attemptPublicId',
+    path: '/mock/$attemptPublicId',
+    getParentRoute: () => CheckoutRoute,
+  } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute
+  '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRouteWithChildren
+  '/dashboard': typeof DashboardRoute
+  '/licenses': typeof LicensesRoute
+  '/orders': typeof OrdersRouteWithChildren
+  '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
+  '/orders/$publicId': typeof OrdersPublicIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/checkout/mock/$attemptPublicId': typeof CheckoutMockAttemptPublicIdRoute
+  '/guest/orders/$publicId': typeof GuestOrdersPublicIdRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute
+  '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRouteWithChildren
+  '/dashboard': typeof DashboardRoute
+  '/licenses': typeof LicensesRoute
+  '/orders': typeof OrdersRouteWithChildren
+  '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
+  '/orders/$publicId': typeof OrdersPublicIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/checkout/mock/$attemptPublicId': typeof CheckoutMockAttemptPublicIdRoute
+  '/guest/orders/$publicId': typeof GuestOrdersPublicIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  "/": typeof IndexRoute
+  '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRouteWithChildren
+  '/dashboard': typeof DashboardRoute
+  '/licenses': typeof LicensesRoute
+  '/orders': typeof OrdersRouteWithChildren
+  '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
+  '/orders/$publicId': typeof OrdersPublicIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/checkout/mock/$attemptPublicId': typeof CheckoutMockAttemptPublicIdRoute
+  '/guest/orders/$publicId': typeof GuestOrdersPublicIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/"
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/cart'
+    | '/checkout'
+    | '/dashboard'
+    | '/licenses'
+    | '/orders'
+    | '/profile'
+    | '/sign-in'
+    | '/sign-up'
+    | '/orders/$publicId'
+    | '/products/$slug'
+    | '/api/auth/$'
+    | '/checkout/mock/$attemptPublicId'
+    | '/guest/orders/$publicId'
   fileRoutesByTo: FileRoutesByTo
-  to: "/"
-  id: "__root__" | "/"
+  to:
+    | '/'
+    | '/admin'
+    | '/cart'
+    | '/checkout'
+    | '/dashboard'
+    | '/licenses'
+    | '/orders'
+    | '/profile'
+    | '/sign-in'
+    | '/sign-up'
+    | '/orders/$publicId'
+    | '/products/$slug'
+    | '/api/auth/$'
+    | '/checkout/mock/$attemptPublicId'
+    | '/guest/orders/$publicId'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/cart'
+    | '/checkout'
+    | '/dashboard'
+    | '/licenses'
+    | '/orders'
+    | '/profile'
+    | '/sign-in'
+    | '/sign-up'
+    | '/orders/$publicId'
+    | '/products/$slug'
+    | '/api/auth/$'
+    | '/checkout/mock/$attemptPublicId'
+    | '/guest/orders/$publicId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  CartRoute: typeof CartRoute
+  CheckoutRoute: typeof CheckoutRouteWithChildren
+  DashboardRoute: typeof DashboardRoute
+  LicensesRoute: typeof LicensesRoute
+  OrdersRoute: typeof OrdersRouteWithChildren
+  ProfileRoute: typeof ProfileRoute
+  SignInRoute: typeof SignInRoute
+  SignUpRoute: typeof SignUpRoute
+  ProductsSlugRoute: typeof ProductsSlugRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  GuestOrdersPublicIdRoute: typeof GuestOrdersPublicIdRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/": {
-      id: "/"
-      path: "/"
-      fullPath: "/"
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders': {
+      id: '/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/licenses': {
+      id: '/licenses'
+      path: '/licenses'
+      fullPath: '/licenses'
+      preLoaderRoute: typeof LicensesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products/$slug': {
+      id: '/products/$slug'
+      path: '/products/$slug'
+      fullPath: '/products/$slug'
+      preLoaderRoute: typeof ProductsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders/$publicId': {
+      id: '/orders/$publicId'
+      path: '/$publicId'
+      fullPath: '/orders/$publicId'
+      preLoaderRoute: typeof OrdersPublicIdRouteImport
+      parentRoute: typeof OrdersRoute
+    }
+    '/guest/orders/$publicId': {
+      id: '/guest/orders/$publicId'
+      path: '/guest/orders/$publicId'
+      fullPath: '/guest/orders/$publicId'
+      preLoaderRoute: typeof GuestOrdersPublicIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/mock/$attemptPublicId': {
+      id: '/checkout/mock/$attemptPublicId'
+      path: '/mock/$attemptPublicId'
+      fullPath: '/checkout/mock/$attemptPublicId'
+      preLoaderRoute: typeof CheckoutMockAttemptPublicIdRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
+interface CheckoutRouteChildren {
+  CheckoutMockAttemptPublicIdRoute: typeof CheckoutMockAttemptPublicIdRoute
+}
+
+const CheckoutRouteChildren: CheckoutRouteChildren = {
+  CheckoutMockAttemptPublicIdRoute: CheckoutMockAttemptPublicIdRoute,
+}
+
+const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
+  CheckoutRouteChildren,
+)
+
+interface OrdersRouteChildren {
+  OrdersPublicIdRoute: typeof OrdersPublicIdRoute
+}
+
+const OrdersRouteChildren: OrdersRouteChildren = {
+  OrdersPublicIdRoute: OrdersPublicIdRoute,
+}
+
+const OrdersRouteWithChildren =
+  OrdersRoute._addFileChildren(OrdersRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  CartRoute: CartRoute,
+  CheckoutRoute: CheckoutRouteWithChildren,
+  DashboardRoute: DashboardRoute,
+  LicensesRoute: LicensesRoute,
+  OrdersRoute: OrdersRouteWithChildren,
+  ProfileRoute: ProfileRoute,
+  SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
+  ProductsSlugRoute: ProductsSlugRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  GuestOrdersPublicIdRoute: GuestOrdersPublicIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from "./router.tsx"
-import type { createStart } from "@tanstack/react-start"
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>

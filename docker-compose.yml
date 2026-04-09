@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: basaltor-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: basaltor
+      POSTGRES_PASSWORD: basaltor
+      POSTGRES_DB: basaltor
+    ports:
+      - "5432:5432"
+    volumes:
+      - basaltor-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U basaltor -d basaltor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: basaltor-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  basaltor-postgres:

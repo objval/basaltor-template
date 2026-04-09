@@ -1,19 +1,76 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { Button } from "@/components/ui/button"
+import { Link, createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/")({ component: App })
+import { brandConfig } from "@/config/brand";
+import { ProductCard } from "@/components/storefront/product-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getStorefront } from "@/modules/catalog/catalog.functions";
+import { getEnabledPaymentProviderNames } from "@/modules/payments/core/presentation";
 
-function App() {
+export const Route = createFileRoute("/")({
+  loader: () => getStorefront(),
+  component: HomePage,
+});
+
+function HomePage() {
+  const { categories, products } = Route.useLoaderData();
+  const providerNames = getEnabledPaymentProviderNames();
+
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 md:px-6">
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+        <div className="space-y-4 rounded-none bg-card p-8 ring-1 ring-foreground/10">
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{brandConfig.eyebrow}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            {providerNames.map((providerName) => (
+              <Badge key={providerName} variant="outline">
+                {providerName}
+              </Badge>
+            ))}
+            <Badge variant="outline">Bulk-ready cart</Badge>
+            <Badge variant="outline">License fulfillment</Badge>
+          </div>
+          <h1 className="max-w-3xl text-4xl font-medium tracking-tight">{brandConfig.headline}</h1>
+          <p className="max-w-3xl text-sm leading-7 text-muted-foreground">{brandConfig.subheadline}</p>
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Button asChild>
+              <Link to="/cart">Open cart</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/admin">Admin workspace</Link>
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
-  )
+        <Card>
+          <CardHeader>
+            <CardTitle>How it works</CardTitle>
+            <CardDescription>
+              Browse products, choose a license duration, check out, and your keys are delivered instantly.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p>Pick a product and variant, then check out as a guest or with your account.</p>
+            <p>After payment, license keys are allocated and delivered to your account or email.</p>
+            <p>Review your order history, delivery status, and license keys from the dashboard.</p>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <Badge key={category.id} variant="outline">
+              {category.name}
+            </Badge>
+          ))}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </section>
+    </main>
+  );
 }

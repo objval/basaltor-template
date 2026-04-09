@@ -48,6 +48,7 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* White-label theme tokens: update these values first when cloning the template. */
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
