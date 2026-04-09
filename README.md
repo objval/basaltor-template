@@ -70,6 +70,7 @@ Change these first:
 - `src/config/brand.ts` — logo paths, theme color, hero copy, favicon/manifest metadata
 - `src/config/template.ts` — local admin seed credentials and smoke-test defaults
 - `src/styles.css` — global OKLCH theme tokens (`:root` + `.dark`)
+- `src/lib/theme.ts` + `src/components/theme/theme-provider.tsx` — TanStack-native SSR theme system (`ScriptOnce`, `light` / `dark` / `system`, `forcedTheme`, transition suppression, theme-color sync)
 - `.env` — app URL, database URL, SMTP, OAuth credentials
 
 Then sync public branding assets:

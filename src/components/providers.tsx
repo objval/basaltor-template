@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { ThemeProvider } from "next-themes";
 
+import type { UserTheme } from "@/lib/theme";
+import { AppThemeProvider } from "@/components/theme/theme-provider";
 import { bindCartPersistence, hydrateCart } from "@/modules/cart/cart.store";
 
 function StoreBootstrap() {
@@ -12,11 +13,16 @@ function StoreBootstrap() {
   return null;
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+type ProvidersProps = {
+  children: React.ReactNode;
+  forcedTheme?: UserTheme;
+};
+
+export function Providers({ children, forcedTheme }: ProvidersProps) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <AppThemeProvider disableTransitionOnChange forcedTheme={forcedTheme}>
       <StoreBootstrap />
       {children}
-    </ThemeProvider>
+    </AppThemeProvider>
   );
 }
