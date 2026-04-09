@@ -1,24 +1,14 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { CatalogAdmin } from "@/components/admin/catalog-admin";
 import { RecentOrdersPanel } from "@/components/admin/recent-orders-panel";
 import { AppShell } from "@/components/layout/app-shell";
-import { PERMISSIONS, hasPermission } from "@/lib/rbac";
-import { getSession } from "@/lib/session";
+import { requireAdminRoute } from "@/lib/route-auth";
 import { getAdminData } from "@/modules/admin/admin.functions";
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: async () => {
-    const session = await getSession();
-    if (!session) {
-      throw redirect({ to: "/sign-in" });
-    }
-
-    if (!hasPermission(session.user.role, PERMISSIONS.usersManage)) {
-      throw redirect({ to: "/dashboard" });
-    }
-
-    return { session };
+  beforeLoad: async ({ location }) => {
+    return requireAdminRoute(location);
   },
   loader: () => getAdminData(),
   component: AdminPage,

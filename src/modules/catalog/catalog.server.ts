@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 
 import { siteConfig } from "@/config/site";
+import { requireServerAdmin } from "@/lib/auth-guards";
 import { db } from "@/lib/db/client";
 import { categories, licenseKeys, licensePools, productVariants, products } from "@/lib/db/schema";
 import { deriveProductAvailability, getVariantState } from "@/modules/catalog/catalog.view";
@@ -135,6 +136,8 @@ export async function getProductDetailBySlug(slug: string) {
 }
 
 export async function getAdminCatalogData() {
+  await requireServerAdmin();
+
   const [categoryRows, productRows, variantRows, availableCounts] = await Promise.all([
     db.select().from(categories).orderBy(asc(categories.sortOrder), asc(categories.name)),
     db.select().from(products).orderBy(desc(products.updatedAt), asc(products.name)),

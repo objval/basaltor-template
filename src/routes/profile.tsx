@@ -1,19 +1,14 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { ChangePasswordForm } from "@/components/profile/change-password-form";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getSession } from "@/lib/session";
+import { requireAuthenticatedRoute } from "@/lib/route-auth";
 
 export const Route = createFileRoute("/profile")({
-  beforeLoad: async () => {
-    const session = await getSession();
-    if (!session) {
-      throw redirect({ to: "/sign-in" });
-    }
-
-    return { session };
+  beforeLoad: async ({ location }) => {
+    return requireAuthenticatedRoute(location);
   },
   component: ProfilePage,
 });

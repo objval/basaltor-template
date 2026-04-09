@@ -13,7 +13,7 @@ export function CartButton() {
     <Button variant="outline" size="sm" asChild>
       <Link to="/cart" className="gap-2">
         <RiShoppingBagLine className="size-4" />
-        <span>Cart</span>
+        <span className="hidden sm:inline">Cart</span>
         {cart.hydrated ? <Badge variant="outline">{totals.itemCount}</Badge> : null}
       </Link>
     </Button>

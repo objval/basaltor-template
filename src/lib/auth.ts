@@ -12,6 +12,29 @@ import { sendAuthEmail, sendOtpEmail } from "@/lib/mailer";
 
 const env = getServerEnv();
 
+function getTrustedAuthOrigins(request?: Request) {
+  const origins = new Set<string>([new URL(env.APP_URL).origin]);
+
+  if (!request) {
+    return Array.from(origins);
+  }
+
+  try {
+    origins.add(new URL(request.url).origin);
+  } catch {
+    // ignore malformed request URLs and keep the configured base origin only
+  }
+
+  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const protocol = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+
+  if (forwardedHost && protocol) {
+    origins.add(`${protocol}://${forwardedHost}`);
+  }
+
+  return Array.from(origins);
+}
+
 const socialProviders = {
   ...(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
     ? {
@@ -35,6 +58,31 @@ export const auth = betterAuth({
   appName: APP_NAME,
   baseURL: env.APP_URL,
   secret: env.BETTER_AUTH_SECRET,
+  trustedOrigins: (request) => getTrustedAuthOrigins(request),
+  rateLimit: {
+    enabled: true,
+    storage: "memory",
+    window: 60,
+    max: 100,
+    customRules: {
+      "/sign-in/email": {
+        window: 60,
+        max: 5,
+      },
+      "/sign-up/email": {
+        window: 300,
+        max: 3,
+      },
+      "/email-otp/send-verification-otp": {
+        window: 300,
+        max: 3,
+      },
+      "/sign-in/email-otp": {
+        window: 300,
+        max: 5,
+      },
+    },
+  },
   database: drizzleAdapter(db, {
     provider: "pg",
     usePlural: true,
@@ -117,6 +165,10 @@ export const auth = betterAuth({
           console.error(`[emailOTP] Failed to send OTP to ${email}:`, err);
           throw err;
         }
+      },
+      rateLimit: {
+        window: 300,
+        max: 3,
       },
       otpLength: 6,
       expiresIn: 300, // 5 minutes

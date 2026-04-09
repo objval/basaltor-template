@@ -12,6 +12,7 @@ import { getServerEnv } from "@/lib/env";
 import { sendGuestOrderEmail } from "@/lib/mailer";
 import { buildGuestOrderAccessUrl, createGuestAccessToken, getGuestAccessExpiryDate, hashGuestAccessToken, verifyGuestAccessToken } from "@/lib/order-access";
 import { generatePublicOrderId, generatePublicPaymentAttemptId } from "@/lib/public-ids";
+import { deriveRateLimitActor, enforceRateLimit } from "@/lib/rate-limit";
 import { buildOrderTrackingSnapshot } from "@/lib/request-tracking";
 import { getPaymentProvider } from "@/modules/payments/core/registry";
 
@@ -106,11 +107,29 @@ function assertGuestOrderAccess(order: typeof orders.$inferSelect, guestToken: s
   return verifyGuestAccessToken({ token: guestToken, tokenHash: order.guestAccessTokenHash });
 }
 
+function enforceCheckoutMutationRateLimit(headers: Headers, bucket: string, fallbackKey: string, windowMs: number, max: number) {
+  const actor = deriveRateLimitActor(headers, fallbackKey);
+  enforceRateLimit({
+    bucket,
+    key: actor,
+    windowMs,
+    max,
+  });
+}
+
 async function createCheckoutForViewer(context: CheckoutViewerContext, input: CreateCheckoutInput, headers: Headers = getRequestHeaders()) {
   const env = getServerEnv();
   if (env.NODE_ENV === "production") {
     throw new Error("Mock checkout providers are disabled in production.");
   }
+
+  enforceCheckoutMutationRateLimit(
+    headers,
+    "checkout:create",
+    context.userId ?? context.customerEmail,
+    10 * 60 * 1000,
+    10,
+  );
 
   const providerId = input.provider as PaymentProviderId;
   const provider = getPaymentProvider(providerId);
@@ -271,11 +290,17 @@ async function createCheckoutForViewer(context: CheckoutViewerContext, input: Cr
   };
 }
 
-async function resolveMockPaymentForViewer(session: Session | null, input: ResolveMockPaymentInput) {
+async function resolveMockPaymentForViewer(
+  session: Session | null,
+  input: ResolveMockPaymentInput,
+  headers: Headers = getRequestHeaders(),
+) {
   const env = getServerEnv();
   if (env.NODE_ENV === "production") {
     throw new Error("Mock payment resolution is disabled in production.");
   }
+
+  enforceCheckoutMutationRateLimit(headers, "checkout:resolve-mock", input.paymentAttemptPublicId, 60 * 1000, 12);
 
   const attempt = await db.query.paymentAttempts.findFirst({
     where: eq(paymentAttempts.publicId, input.paymentAttemptPublicId),
@@ -295,6 +320,24 @@ async function resolveMockPaymentForViewer(session: Session | null, input: Resol
 
   if (!sessionCanAccess && !guestCanAccess) {
     throw new Error("This checkout is not accessible for the current viewer.");
+  }
+
+  if (input.outcome === "failed" && (attempt.status === "failed" || order.status === "failed")) {
+    return {
+      orderPublicId: order.publicId,
+      status: "failed" as const,
+      customerMode: order.customerMode,
+      guestToken: guestCanAccess ? input.guestToken ?? null : null,
+    };
+  }
+
+  if (input.outcome === "paid" && order.status === "fulfilled") {
+    return {
+      orderPublicId: order.publicId,
+      status: "fulfilled" as const,
+      customerMode: order.customerMode,
+      guestToken: guestCanAccess ? input.guestToken ?? null : null,
+    };
   }
 
   const items = await db.select().from(orderItems).where(eq(orderItems.orderId, order.id)).orderBy(asc(orderItems.createdAt));
@@ -388,5 +431,5 @@ export async function resolveMockPayment(input: ResolveMockPaymentInput) {
 }
 
 export async function resolveMockPaymentForSmokeTest(input: ResolveMockPaymentInput) {
-  return resolveMockPaymentForViewer(null, input);
+  return resolveMockPaymentForViewer(null, input, new Headers());
 }

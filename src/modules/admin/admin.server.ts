@@ -44,7 +44,16 @@ export async function getAdminPageData() {
   return {
     ...catalog,
     recentOrders: recentOrders.map((order) => ({
-      ...order,
+      id: order.id,
+      publicId: order.publicId,
+      status: order.status,
+      currency: order.currency,
+      totalMinor: order.totalMinor,
+      createdAt: order.createdAt,
+      customerMode: order.customerMode,
+      customerName: order.customerName,
+      customerEmail: order.customerEmail,
+      placedFromIp: order.placedFromIp,
       paymentAttempt: (attemptsByOrder.get(order.id) ?? [])[0] ?? null,
       allocationCount: allocationCountMap.get(order.id) ?? 0,
     })),

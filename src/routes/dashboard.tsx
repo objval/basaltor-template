@@ -1,20 +1,15 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toArray } from "@/lib/collections";
-import { getSession } from "@/lib/session";
+import { requireAuthenticatedRoute } from "@/lib/route-auth";
 import { getMyLicenses, getMyOrders } from "@/modules/orders/orders.functions";
 
 export const Route = createFileRoute("/dashboard")({
-  beforeLoad: async () => {
-    const session = await getSession();
-    if (!session) {
-      throw redirect({ to: "/sign-in" });
-    }
-
-    return { session };
+  beforeLoad: async ({ location }) => {
+    return requireAuthenticatedRoute(location);
   },
   loader: async () => {
     const [orders, licenses] = await Promise.all([getMyOrders(), getMyLicenses()]);

@@ -1,4 +1,4 @@
-import { Link, createFileRoute, redirect } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -6,17 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toArray } from "@/lib/collections";
 import { formatMoney } from "@/lib/money";
-import { getSession } from "@/lib/session";
+import { requireAuthenticatedRoute } from "@/lib/route-auth";
 import { getMyOrders } from "@/modules/orders/orders.functions";
 
 export const Route = createFileRoute("/orders")({
-  beforeLoad: async () => {
-    const session = await getSession();
-    if (!session) {
-      throw redirect({ to: "/sign-in" });
-    }
-
-    return { session };
+  beforeLoad: async ({ location }) => {
+    return requireAuthenticatedRoute(location);
   },
   loader: () => getMyOrders(),
   component: OrdersPage,
@@ -41,7 +36,7 @@ function OrdersPage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline">{order.status}</Badge>
-                  <Badge variant="outline">{order.latestPaymentAttempt.provider}</Badge>
+                  {order.latestPaymentAttempt ? <Badge variant="outline">{order.latestPaymentAttempt.provider}</Badge> : null}
                 </div>
               </div>
             </CardHeader>

@@ -39,7 +39,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="min-h-screen bg-background text-foreground">
         <Providers>
           <AppHeader />
-          {children}
+          <div className="flex min-h-[calc(100svh-4rem)] flex-col pt-16">{children}</div>
         </Providers>
         <TanStackDevtools
           config={{ position: "bottom-right" }}

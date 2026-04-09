@@ -13,7 +13,7 @@ export async function getOptionalServerSession(): Promise<AppSession | null> {
 export async function requireServerSession(): Promise<AppSession> {
   const session = await getOptionalServerSession();
   if (!session) {
-    throw redirect({ to: "/sign-in" });
+    throw redirect({ to: "/sign-in", search: { redirect: "/dashboard" } });
   }
 
   return session;

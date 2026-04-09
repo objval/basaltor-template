@@ -2,18 +2,53 @@ import { asc, desc, eq, inArray } from "drizzle-orm";
 
 import { getOptionalServerSession } from "@/lib/auth-guards";
 import { db } from "@/lib/db/client";
-import { PERMISSIONS, hasPermission } from "@/lib/rbac";
-import { verifyGuestAccessToken } from "@/lib/order-access";
 import { categories, licenseAllocations, orderItems, orders, paymentAttempts, productVariants, products } from "@/lib/db/schema";
+import { verifyGuestAccessToken } from "@/lib/order-access";
+import { PERMISSIONS, hasPermission } from "@/lib/rbac";
+
+function toOrderItemView(item: typeof orderItems.$inferSelect) {
+  return {
+    id: item.id,
+    productName: item.productName,
+    variantName: item.variantName,
+    quantity: item.quantity,
+    unitPriceMinor: item.unitPriceMinor,
+    totalPriceMinor: item.totalPriceMinor,
+    currency: item.currency,
+  };
+}
+
+function toPaymentAttemptView(attempt: typeof paymentAttempts.$inferSelect) {
+  return {
+    id: attempt.id,
+    publicId: attempt.publicId,
+    provider: attempt.provider,
+    providerLabel: attempt.providerLabel,
+    providerReference: attempt.providerReference,
+    status: attempt.status,
+  };
+}
+
+function toAllocationView(allocation: typeof licenseAllocations.$inferSelect) {
+  return {
+    id: allocation.id,
+    deliveredKey: allocation.deliveredKey,
+    deliveredAt: allocation.deliveredAt,
+  };
+}
 
 async function getOrderItemsForOrders(orderIds: Array<string>) {
-  if (!orderIds.length) return [] as Array<typeof orderItems.$inferSelect>;
+  if (!orderIds.length) {
+    return [] as Array<typeof orderItems.$inferSelect>;
+  }
 
   return db.select().from(orderItems).where(inArray(orderItems.orderId, orderIds)).orderBy(asc(orderItems.createdAt));
 }
 
 async function getPaymentAttemptsForOrders(orderIds: Array<string>) {
-  if (!orderIds.length) return [] as Array<typeof paymentAttempts.$inferSelect>;
+  if (!orderIds.length) {
+    return [] as Array<typeof paymentAttempts.$inferSelect>;
+  }
 
   return db
     .select()
@@ -84,9 +119,19 @@ export async function getOrdersForCurrentUser() {
   }
 
   return orderRows.map((order) => ({
-    ...order,
-    items: itemsByOrder.get(order.id) ?? [],
-    latestPaymentAttempt: (attemptsByOrder.get(order.id) ?? [])[0] ?? null,
+    id: order.id,
+    publicId: order.publicId,
+    status: order.status,
+    currency: order.currency,
+    totalMinor: order.totalMinor,
+    createdAt: order.createdAt,
+    items: (itemsByOrder.get(order.id) ?? []).map(toOrderItemView),
+    latestPaymentAttempt: (() => {
+      const attemptsForOrder = attemptsByOrder.get(order.id);
+      return attemptsForOrder && attemptsForOrder.length > 0
+        ? toPaymentAttemptView(attemptsForOrder[0])
+        : null;
+    })(),
   }));
 }
 
@@ -95,7 +140,9 @@ export async function getOrderDetailForViewer(publicId: string, guestToken?: str
     where: eq(orders.publicId, publicId),
   });
 
-  if (!order) return null;
+  if (!order) {
+    return null;
+  }
 
   const viewer = await getOrderViewerAccess(order, guestToken);
   if (!viewer) {
@@ -109,10 +156,23 @@ export async function getOrderDetailForViewer(publicId: string, guestToken?: str
   ]);
 
   return {
-    ...order,
-    items,
-    paymentAttempts: attempts,
-    allocations,
+    publicId: order.publicId,
+    status: order.status,
+    totalMinor: order.totalMinor,
+    currency: order.currency,
+    customerMode: order.customerMode,
+    customerName: viewer.isPrivileged ? order.customerName : null,
+    customerEmail: viewer.isPrivileged ? order.customerEmail : null,
+    customerContactHandle: viewer.isPrivileged ? order.customerContactHandle : null,
+    customerCountry: viewer.isPrivileged ? order.customerCountry : null,
+    customerNote: viewer.isPrivileged ? order.customerNote : null,
+    placedFromIp: viewer.isPrivileged ? order.placedFromIp : null,
+    placedFromUserAgent: viewer.isPrivileged ? order.placedFromUserAgent : null,
+    placedFromReferrer: viewer.isPrivileged ? order.placedFromReferrer : null,
+    placedFromAcceptLanguage: viewer.isPrivileged ? order.placedFromAcceptLanguage : null,
+    items: items.map(toOrderItemView),
+    paymentAttempts: attempts.map(toPaymentAttemptView),
+    allocations: allocations.map(toAllocationView),
     viewerMode: viewer.kind,
     isPrivileged: viewer.isPrivileged,
   };
@@ -150,7 +210,35 @@ export async function getLicensesForCurrentUser() {
     .where(eq(licenseAllocations.userId, session.user.id))
     .orderBy(desc(licenseAllocations.deliveredAt));
 
-  return allocations;
+  return allocations.map((entry) => ({
+    allocation: toAllocationView(entry.allocation),
+    item: {
+      id: entry.item.id,
+      productName: entry.item.productName,
+      variantName: entry.item.variantName,
+    },
+    order: {
+      publicId: entry.order.publicId,
+    },
+    variant: entry.variant
+      ? {
+          id: entry.variant.id,
+          name: entry.variant.name,
+        }
+      : null,
+    product: entry.product
+      ? {
+          id: entry.product.id,
+          name: entry.product.name,
+        }
+      : null,
+    category: entry.category
+      ? {
+          id: entry.category.id,
+          name: entry.category.name,
+        }
+      : null,
+  }));
 }
 
 export async function getMockPaymentAttempt(publicId: string, guestToken?: string) {
@@ -158,10 +246,14 @@ export async function getMockPaymentAttempt(publicId: string, guestToken?: strin
     where: eq(paymentAttempts.publicId, publicId),
   });
 
-  if (!attempt) return null;
+  if (!attempt) {
+    return null;
+  }
 
   const order = await db.query.orders.findFirst({ where: eq(orders.id, attempt.orderId) });
-  if (!order) return null;
+  if (!order) {
+    return null;
+  }
 
   const viewer = await getOrderViewerAccess(order, guestToken);
   if (!viewer) {
@@ -169,5 +261,16 @@ export async function getMockPaymentAttempt(publicId: string, guestToken?: strin
   }
 
   const items = await db.select().from(orderItems).where(eq(orderItems.orderId, order.id)).orderBy(asc(orderItems.createdAt));
-  return { attempt, order, items, viewerMode: viewer.kind };
+  return {
+    attempt: toPaymentAttemptView(attempt),
+    order: {
+      publicId: order.publicId,
+      totalMinor: order.totalMinor,
+      currency: order.currency,
+      status: order.status,
+      customerMode: order.customerMode,
+    },
+    items: items.map(toOrderItemView),
+    viewerMode: viewer.kind,
+  };
 }

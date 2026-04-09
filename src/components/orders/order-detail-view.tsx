@@ -10,8 +10,8 @@ type OrderDetailViewProps = {
     totalMinor: number;
     currency: string;
     customerMode: string;
-    customerName: string;
-    customerEmail: string;
+    customerName: string | null;
+    customerEmail: string | null;
     customerContactHandle: string | null;
     customerCountry: string | null;
     customerNote: string | null;
@@ -76,15 +76,19 @@ export function OrderDetailView({ data, retryHref, showCustomerInsights = false 
             <CardTitle>Payment attempts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            {data.paymentAttempts.map((attempt) => (
-              <div key={attempt.id} className="border border-border px-3 py-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span>{attempt.providerLabel || attempt.provider}</span>
-                  <Badge variant="outline">{attempt.status}</Badge>
+            {data.paymentAttempts.length ? (
+              data.paymentAttempts.map((attempt) => (
+                <div key={attempt.id} className="border border-border px-3 py-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{attempt.providerLabel || attempt.provider}</span>
+                    <Badge variant="outline">{attempt.status}</Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground">{attempt.publicId}</div>
                 </div>
-                <div className="text-xs text-muted-foreground">{attempt.publicId}</div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-muted-foreground">No payment attempts are recorded for this order yet.</p>
+            )}
             {retryHref ? (
               <Button variant="outline" className="w-full" asChild>
                 <a href={retryHref}>Retry payment</a>

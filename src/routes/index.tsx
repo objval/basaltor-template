@@ -5,17 +5,26 @@ import { ProductCard } from "@/components/storefront/product-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PERMISSIONS, hasPermission } from "@/lib/rbac";
+import { getSession } from "@/lib/session";
 import { getStorefront } from "@/modules/catalog/catalog.functions";
 import { getEnabledPaymentProviderNames } from "@/modules/payments/core/presentation";
 
 export const Route = createFileRoute("/")({
-  loader: () => getStorefront(),
+  loader: async () => {
+    const [storefront, session] = await Promise.all([getStorefront(), getSession()]);
+    return {
+      ...storefront,
+      session,
+    };
+  },
   component: HomePage,
 });
 
 function HomePage() {
-  const { categories, products } = Route.useLoaderData();
+  const { categories, products, session } = Route.useLoaderData();
   const providerNames = getEnabledPaymentProviderNames();
+  const canManage = session ? hasPermission(session.user.role, PERMISSIONS.usersManage) : false;
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 md:px-6">
@@ -37,9 +46,19 @@ function HomePage() {
             <Button asChild>
               <Link to="/cart">Open cart</Link>
             </Button>
-            <Button variant="outline" asChild>
-              <Link to="/admin">Admin workspace</Link>
-            </Button>
+            {canManage ? (
+              <Button variant="outline" asChild>
+                <Link to="/admin">Admin workspace</Link>
+              </Button>
+            ) : session ? (
+              <Button variant="outline" asChild>
+                <Link to="/dashboard">Dashboard</Link>
+              </Button>
+            ) : (
+              <Button variant="outline" asChild>
+                <Link to="/sign-in" search={{ redirect: "/dashboard" }}>Sign in</Link>
+              </Button>
+            )}
           </div>
         </div>
         <Card>

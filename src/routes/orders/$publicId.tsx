@@ -1,19 +1,14 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { OrderDetailView } from "@/components/orders/order-detail-view";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { getSession } from "@/lib/session";
+import { requireAuthenticatedRoute } from "@/lib/route-auth";
 import { getMyOrderDetail } from "@/modules/orders/orders.functions";
 
 export const Route = createFileRoute("/orders/$publicId")({
-  beforeLoad: async () => {
-    const session = await getSession();
-    if (!session) {
-      throw redirect({ to: "/sign-in" });
-    }
-
-    return { session };
+  beforeLoad: async ({ location }) => {
+    return requireAuthenticatedRoute(location);
   },
   loader: ({ params }) => getMyOrderDetail({ data: { publicId: params.publicId } }),
   component: OrderDetailPage,
